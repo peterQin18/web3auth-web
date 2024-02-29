@@ -1,24 +1,32 @@
 import { useEffect, useState } from "react";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
-import { CHAIN_NAMESPACES, CustomChainConfig, SafeEventEmitterProvider, WALLET_ADAPTERS, getChainConfig, getEvmChainConfig } from "@web3auth/base";
+import {
+  CHAIN_NAMESPACES,
+  CustomChainConfig,
+  IAdapter,
+  SafeEventEmitterProvider,
+  WALLET_ADAPTERS,
+  getChainConfig,
+  getEvmChainConfig,
+} from "@web3auth/base";
 import { OpenloginAdapter, OpenloginAdapterOptions, OpenloginLoginParams } from "@web3auth/openlogin-adapter";
 // import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
 // import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
-import { PhantomAdapter } from "@web3auth/phantom-adapter";
 import "./App.css";
 import RPC from "./web3RPC"; // for using web3.js
-import { MetamaskAdapter } from "@web3auth/metamask-adapter";
-import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
-import { SolanaWalletAdapter } from "@web3auth/torus-solana-adapter";
-import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
 //import RPC from "./ethersRPC"; // for using ethers.js
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-
-const clientId = "BEglQSgt4cUWcj6SKRdu5QkOXTsePmMcusG5EAoyjyOYKlVRjIF1iCNnMOTfpzCiunHRrMui8TIwQPXdkQ8Yxuk"; // get from https://dashboard.web3auth.io
+import { ApplicationContainer, Environment } from "oauthloginrepo";
+// import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v2-adapter";
+import instance from "axios";
+import { json } from "stream/consumers";
+import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
+const clientId = "BObzu5_GBDk0s-bXiUwrRLgbX5QnmrExK2HUCOoVpxNCQRdWYDaPvPlGTwvPbbGZLvQEnRzzfqhCqYE5c9_nlfc"; // get from https://dashboard.web3auth.io
 
 function App() {
   const [web3auth, setWeb3auth] = useState<Web3AuthNoModal | null>(null);
   const [provider, setProvider] = useState<SafeEventEmitterProvider | null>(null);
+  const [toekn, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -26,9 +34,11 @@ function App() {
         const web3auth = new Web3AuthNoModal({
           clientId,
           chainConfig: {
+            chainId: "1",
+            rpcTarget: "",
             chainNamespace: CHAIN_NAMESPACES.EIP155,
           },
-          web3AuthNetwork: "cyan",
+          web3AuthNetwork: "sapphire_devnet",
         });
 
         setWeb3auth(web3auth);
@@ -42,9 +52,8 @@ function App() {
         });
         web3auth.configureAdapter(openloginAdapter);
 
-        const adapter = new WalletConnectV1Adapter();
+        const adapter = new WalletConnectV1Adapter() as unknown as IAdapter<unknown>; // Add type assertion to the adapter
         web3auth.configureAdapter(adapter);
-
         await web3auth.init();
         if (web3auth.connectedAdapterName && web3auth.provider) {
           setProvider(web3auth.provider);
@@ -64,6 +73,20 @@ function App() {
     }
     const web3authProvider = await web3auth.connectTo<OpenloginLoginParams>(WALLET_ADAPTERS.OPENLOGIN, { loginProvider: "google" });
     setProvider(web3authProvider);
+  };
+
+  const oauthLogin = async () => {
+    if (!web3auth) {
+      uiConsole("web3auth not initialized yet");
+      return;
+    }
+    // const result = await ApplicationContainer.getInstance().web3Login(web3auth, "EXTERNAL_SOCIAL", provider, "evm", "saas_id", false);
+    // if (result.success == false) {
+    //   uiConsole("oauthLogin 失败, message=>" + result.msgKey);
+    //   return;
+    // }
+    // localStorage.setItem("token", result.obj?.jwtKey ?? "");
+    // uiConsole("oauthLogin 成功, token=>" + JSON.stringify(result.obj));
   };
 
   const authenticateUser = async () => {
@@ -244,6 +267,11 @@ function App() {
         <div>
           <button onClick={logout} className="card">
             Log Out
+          </button>
+        </div>
+        <div id="web3AuthLogin" style={{ whiteSpace: "pre-line" }}>
+          <button onClick={oauthLogin} className="card">
+            web3Auth-oauthLogin
           </button>
         </div>
       </div>

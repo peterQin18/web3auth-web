@@ -1,0 +1,13 @@
+diff --git a/node_modules/oauthloginrepo/generated/core/request.ts b/node_modules/oauthloginrepo/generated/core/request.ts
+index 220efd6..8830b68 100644
+--- a/node_modules/oauthloginrepo/generated/core/request.ts
++++ b/node_modules/oauthloginrepo/generated/core/request.ts
+@@ -2,7 +2,7 @@
+ /* istanbul ignore file */
+ /* tslint:disable */
+ /* eslint-disable */
+-import axios from "axios";
++import axios from "../../../../src/axiosInstance";
+ import type {
+   AxiosError,
+   AxiosRequestConfig,

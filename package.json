@@ -85,5 +85,8 @@
   "engines": {
     "node": ">=18.x",
     "npm": ">=9.x"
+  },
+  "dependencies": {
+    "@web3auth/no-modal": "^8.0.1"
   }
 }
